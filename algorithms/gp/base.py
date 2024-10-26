@@ -1,0 +1,2 @@
+class BaseGPRegressor:
+    pass
