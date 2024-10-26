@@ -55,7 +55,39 @@ class HybridPredictor:
 
         return valid
 
+    def chunkify_with_back_sampling(self, X, y):
+        N = X.shape[0]
+        num_full_chunks = N // self.config.chunk_size
+        chunks_X, chunks_y = [], []
+        
+        # Create full chunks
+        for i in range(num_full_chunks):
+            chunks_X.append(X[i * self.config.chunk_size:(i + 1) * self.config.chunk_size])
+            chunks_y.append(y[i * self.config.chunk_size:(i + 1) * self.config.chunk_size])
+        
+        # If there are remaining samples, create the last chunk
+        remaining_count = N % self.config.chunk_size
+        if remaining_count > 0:
+            # Gather all previous samples and randomly select from them for the last chunk
+            all_previous_indices = np.arange(num_full_chunks * self.config.chunk_size)
+            sampled_indices = np.random.choice(all_previous_indices, self.config.chunk_size, replace=False)
+            chunks_X.append(X[sampled_indices])
+            chunks_y.append(y[sampled_indices])
+
+        return chunks_X, chunks_y
+
     def get_candidate_equations(self, X, y):
+        chunks_X, chunks_y = self.chunkify_with_back_sampling(X, y)
+        
+        candidate_equations = []
+        for Xi, yi in zip(chunks_X, chunks_y):
+            candidate_equations.extend(
+                self.get_candidate_equations_single(Xi, yi)
+            )
+
+        return candidate_equations
+
+    def get_candidate_equations_single(self, X, y):
         x, num_array = self.format_data_for_transformer(X, y)
         expressions = self.generate_expressions(x, num_array)
         expressions = self.validate_expressions(expressions)
@@ -90,7 +122,7 @@ class HybridPredictor:
         return gp
     
     def predict_equation(self, X, y):
-        candidates = self.get_candidate_equations(X, y, self.config.num_equations)
+        candidates = self.get_candidate_equations(X, y)
         gp = self.get_gp_predictor(X.shape[1])
         points = [(xi.tolist(), yi) for (xi, yi) in zip(X,y)]
         hof = gp(points, candidates)
