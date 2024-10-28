@@ -65,9 +65,9 @@ class LinearPointEmbedder(nn.Module):
 
     def forward(self, tokens, num_array):
         out = self.embedding(tokens.long()) # * math.sqrt(self.emb_size)
-        dims = torch.tensor(out.size(1)*out.size(2)*out.size(3))
-        mag_norm = 5/torch.sqrt(dims)
-        out += torch.zeros_like(out).uniform_(-mag_norm, mag_norm)
+        #dims = torch.tensor(out.size(1)*out.size(2)*out.size(3))
+        #mag_norm = 5/torch.sqrt(dims)
+        #out += torch.zeros_like(out).uniform_(-mag_norm, mag_norm)
         #print("embed", out.shape)
         #print("num", num_array.shape)
         bs, n = out.shape[0], out.shape[1]

@@ -1,0 +1,51 @@
+# Experiment details
+experiment_name: "seq2seq4"
+root_dir: "./"
+device: "cuda:0"
+
+# Training parameters
+epochs: 10
+seed: 42
+use_half_precision: true
+
+# Scheduler parameters
+scheduler_type: "cosine_annealing" # Options: "multi_step", "none"
+T_0: 10
+T_mult: 1
+T_max: 18750
+
+# Optimizer parameters
+optimizer_type: "adam" # Options: "sgd", "adam"
+optimizer_lr: 5e-5
+optimizer_momentum: 0.9
+optimizer_weight_decay: 0.0001
+optimizer_no_decay: []
+clip_grad_norm: -1
+
+# Model parameters
+model_name: "seq2seq_transformer"
+hybrid: true
+embedding_size: 64
+hidden_dim: 64
+pff_dim: 512
+nhead: 8
+num_encoder_layers: 2
+num_decoder_layers: 6
+dropout: 0.2
+input_emb_size: 64
+max_input_points: 11
+src_vocab_size: 3
+tgt_vocab_size: 59
+
+# Criterion
+criterion: "cross_entropy"
+
+# Hybrid parameters
+xval: true
+pop_size: 500
+cxpb: 0.7
+mutpb: 0.2
+num_generations: 15
+chunk_size: 400
+beam_size: 5
+num_equations: 20

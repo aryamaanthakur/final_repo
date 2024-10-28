@@ -1,4 +1,8 @@
+import torch
+from sklearn.metrics import r2_score
+from deap import gp
 import numpy as np
+from utils.tokenizers import DecoderTokenizer
 from utils.sympy_prefix import prefix_to_sympy
 from utils.sympy_deap import sympy_to_deap, deap_to_sympy
 from algorithms.hybrid.custom_gp import CustomGP, CustomGPConfig
@@ -10,10 +14,11 @@ class HybridPredictor:
     def __init__(self, config):
         self.config = config
         self.predictor = self.get_predictor()
-
+        self.tokenizer = DecoderTokenizer("algorithms/xval_transformers/decoder_vocab")
+    
     def get_predictor(self):
         if self.config.xval:
-            from algorithms.xval_transformers import BeamPredictor
+            from algorithms.xval_transformers.engine.predictor import BeamPredictor
         else:
             from algorithms.transformers import BeamPredictor
         predictor = BeamPredictor(self.config)
@@ -41,7 +46,10 @@ class HybridPredictor:
         # check for integers too
         for expression in expressions:
             try:
-                expression = prefix_to_sympy(expressions)
+                expression = expression.type(torch.long)[0].tolist()
+                print(f"{expression=}")
+                expression = self.tokenizer.reverse_tokenize([expression[1:-1]])[0]
+                #expression = prefix_to_sympy(expressions)
                 if expression not in valid:
                     valid.append(expression)
             except:
@@ -88,28 +96,47 @@ class HybridPredictor:
         return candidate_equations
 
     def get_candidate_equations_single(self, X, y):
+        num_vars = X.shape[1]
         x, num_array = self.format_data_for_transformer(X, y)
         expressions = self.generate_expressions(x, num_array)
-        expressions = self.validate_expressions(expressions)
+        #print(f"{expressions[0]=}")
+        
+        expressions = self.validate_expressions(expressions, num_vars)
+        #print(f"{expressions[0]=}")
         candidates = []
         for expression in expressions:
-            candidates.append(sympy_to_deap(expression))
+            try:
+                candidates.append(sympy_to_deap(expression))
+            except:
+                pass
         return candidates
     
     def format_data_for_transformer(self, X, y):
-        if self.xval:
+        if self.config.xval:
             N, n = X.shape
-            x = np.concatenate([y, X], axis=1)
+            x = np.concatenate([y.reshape(-1, 1), X], axis=1)
             padding = np.ones((N, self.config.max_input_points - n - 1))
             num_array = np.concatenate((x, padding), axis=1)
-            x = np.concatenate([np.ones((N, n))*NUM_IDX, padding*PAD_IDX], axis=1)
-
+            x = np.concatenate([np.ones((N, n+1))*NUM_IDX, padding*PAD_IDX], axis=1)
+            
+            x = torch.from_numpy(x).to(self.config.device)
+            num_array = torch.from_numpy(num_array).to(self.config.device)
             return x, num_array
         else:
             print("Coming in future")
             return NotImplementedError
         
-    
+    def perfect_candidate(self, candidates, X, y):
+        pset = CustomGP.get_pset(X.shape[1])
+        for candidate in candidates:
+            func = gp.compile(expr=candidate, pset=pset)
+            y_pred = [func(*x.tolist()) for x in X]
+            score = r2_score(y, y_pred)
+            if abs(score - 1) < 1e-6:
+                return True, func
+
+        return False, None
+
     def get_gp_predictor(self, num_vars):
         gp_config = CustomGPConfig(
             pop_size=self.config.pop_size,
@@ -123,7 +150,11 @@ class HybridPredictor:
     
     def predict_equation(self, X, y):
         candidates = self.get_candidate_equations(X, y)
+        #is_perfect, eqn = self.perfect_candidate(candidates, X, y)
+        #if is_perfect:
+        #    return deap_to_sympy(str(eqn))
+
         gp = self.get_gp_predictor(X.shape[1])
         points = [(xi.tolist(), yi) for (xi, yi) in zip(X,y)]
-        hof = gp(points, candidates)
-        return deap_to_sympy(hof[0])
+        hof, _ = gp(points, candidates)
+        return deap_to_sympy(str(hof))

@@ -1,5 +1,6 @@
 import os
 import torch
+import torch.nn.functional as F
 
 # Define special tokens
 BOS_IDX = 1
@@ -32,7 +33,7 @@ class Predictor:
         self.model.eval()
         
     def get_model(self):
-        from model.seq2seq import Model
+        from algorithms.xval_transformers.model.seq2seq import Model
         model = Model(num_encoder_layers=self.config.num_encoder_layers,
                         num_decoder_layers=self.config.num_decoder_layers,
                         emb_size=self.config.embedding_size,
@@ -100,7 +101,7 @@ class BeamPredictor(Predictor):
         Args:
         - config: Configuration object containing model parameters
         """
-        self.super(config)
+        super().__init__(config)
 
 
     def generate_square_subsequent_mask(self, sz, device):
