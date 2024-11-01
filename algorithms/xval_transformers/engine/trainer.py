@@ -58,7 +58,7 @@ class Trainer:
         """
         Initialize and return the model based on the configuration.
         """
-        from model.seq2seq import Model
+        from algorithms.xval_transformers.model.seq2seq import Model
         model = Model(num_encoder_layers=self.config.num_encoder_layers,
                         num_decoder_layers=self.config.num_decoder_layers,
                         emb_size=self.config.embedding_size,
@@ -76,7 +76,7 @@ class Trainer:
         Initialize and return the optimizer based on the configuration.
         """
         optimizer_parameters = self.model.parameters()
-
+        
         if self.config.optimizer_type == "sgd":
             optimizer = torch.optim.SGD(optimizer_parameters, lr=self.config.optimizer_lr, momentum=self.config.optimizer_momentum,)
         elif self.config.optimizer_type == "adam":
@@ -143,16 +143,15 @@ class Trainer:
                             
             running_loss.update(loss.item(), bs)
             pbar.set_postfix(loss=running_loss.avg)
-#            pbar.set_postfix(lr=self.scheduler.get_lr())
-            self.scheduler.step()
             self.optimizer.zero_grad()
             self.scaler.scale(loss).backward()
-            #loss.backward()
             if self.config.clip_grad_norm > 0:
                 torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.config.clip_grad_norm)
             self.scaler.step(self.optimizer)
             self.scaler.update()
-            #self.optimizer.step()
+            
+            if self.config.scheduler_type in ["cosine_annealing", "cosine_annealing_warm_restarts"]:
+                self.scheduler.step()
     
         return running_loss.avg
 
@@ -208,9 +207,9 @@ class Trainer:
             self.valid_loss_list.append(round(valid_loss, 7))
             self.valid_accuracy_tok_list.append(round(valid_accuracy_tok, 7))
             
-            if self.scheduler == "multi_step":
+            if self.config.scheduler_type == "multi_step":
                 self.scheduler.step()
-            elif self.scheduler == "reduce_lr_on_plateau":
+            elif self.config.scheduler_type == "reduce_lr_on_plateau":
                 self.scheduler.step(valid_loss)
                 
             if valid_loss<self.best_val_loss:

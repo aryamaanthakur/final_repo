@@ -33,7 +33,7 @@ class Predictor:
         
     def get_model(self):
         if self.config.model_name == "seq2seq_transformer":
-            from model.seq2seq import Model
+            from algorithms.transformers.model.seq2seq import Model
             model = Model(num_encoder_layers=self.config.num_encoder_layers,
                           num_decoder_layers=self.config.num_decoder_layers,
                           emb_size=self.config.embedding_size,
@@ -44,7 +44,7 @@ class Predictor:
                           max_input_points=self.config.max_input_points,
                           )
         elif self.config.model_name == "evolved_transformer":
-            from model.evolved_transformer import Model
+            from algorithms.transformers.model.evolved_transformer import Model
             model = Model(self.config)
         else:
             raise NotImplementedError

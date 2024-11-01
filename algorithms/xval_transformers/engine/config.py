@@ -57,6 +57,7 @@ class Config:
     cxpb: Optional[float] = 0.7
     mutpb: Optional[float] = 0.2 
     num_generations: Optional[int] = 15
+    gp_verbose: Optional[bool] = False
     chunk_size: Optional[int] = 400
     beam_size: Optional[int] = 5
     num_equations: Optional[int] = 20

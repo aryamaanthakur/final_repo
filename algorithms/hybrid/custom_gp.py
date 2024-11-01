@@ -89,6 +89,7 @@ class CustomGPConfig:
     mutpb: Optional[float] = field(default=0.1)
     num_generations: Optional[int] = field(default=15)
     num_vars: Optional[int] = field(default=5)
+    verbose: Optional[bool] = field(default=False)
 
 class CustomGP:
     """Custom Genetic Programming class for symbolic regression tasks."""
@@ -139,17 +140,15 @@ class CustomGP:
         return toolbox
 
     @staticmethod
-    def get_initial_population(pop_size, seed_exprs, pset, toolbox):
+    def get_initial_population(pop_size, candidates, pset, toolbox):
         population = []
         
-        for expr in seed_exprs:
+        for expr in candidates:
             try:
                 candidate = creator.Individual.from_string(expr, pset)
                 population.append(candidate)
             except:
                 continue
-        
-        print(f"Total seed expressions: {len(seed_exprs)}, Valid expressions used: {len(population)}")
         
         for i in range(pop_size - len(population)):
             random_candidate = toolbox.individual()
@@ -193,7 +192,9 @@ class CustomGP:
             individual.fitness.values = fitness_score
             if float(fitness_score[0]) < 1e-7:
                 r2_score = r2_score_from_fitness(points, fitness_score[0])
-                print("R2_score:", r2_score)
+                if self.config.verbose:
+                    print("R2_score:", r2_score)
+                    print("Fitness:", fitness_score[0])
                 return individual, r2_score
 
         hof = tools.HallOfFame(5)
@@ -206,12 +207,11 @@ class CustomGP:
             self.config.num_generations,
             stats=stats,
             halloffame=hof,
-            verbose=self.config.gp_verbose
+            verbose=self.config.verbose
         )
 
         r2_score = r2_score_from_fitness(points, hof[0].fitness.values[0])
-        print("R2_score:", r2_score)
-
-        print("Best individual:", hof[0])
-        print("Fitness:", hof[0].fitness.values)
+        if self.config.verbose:
+            print("R2_score:", r2_score)
+            print("Fitness:", hof[0].fitness.values)
         return hof[0], r2_score

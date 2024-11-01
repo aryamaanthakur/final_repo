@@ -47,7 +47,7 @@ class HybridPredictor:
         for expression in expressions:
             try:
                 expression = expression.type(torch.long)[0].tolist()
-                print(f"{expression=}")
+                # print(f"{expression=}")
                 expression = self.tokenizer.reverse_tokenize([expression[1:-1]])[0]
                 #expression = prefix_to_sympy(expressions)
                 if expression not in valid:
@@ -143,7 +143,8 @@ class HybridPredictor:
             cxpb = self.config.cxpb,
             mutpb = self.config.mutpb,
             num_generations = self.config.num_generations,
-            num_vars = num_vars
+            num_vars = num_vars,
+            verbose = self.config.gp_verbose
         )
         gp = CustomGP(gp_config)
         return gp
@@ -156,5 +157,5 @@ class HybridPredictor:
 
         gp = self.get_gp_predictor(X.shape[1])
         points = [(xi.tolist(), yi) for (xi, yi) in zip(X,y)]
-        hof, _ = gp(points, candidates)
-        return deap_to_sympy(str(hof))
+        eqn, r2 = gp(points, candidates)
+        return deap_to_sympy(str(eqn)), r2

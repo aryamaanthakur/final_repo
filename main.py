@@ -54,7 +54,6 @@ def main():
         config.data_dir,
         [config.train_split, 1 - config.train_split - config.test_split, config.test_split]
     )
-    #put assert in dataset.py
 
     dataloaders = get_dataloaders(
         datasets,
@@ -62,8 +61,6 @@ def main():
         config.train_batch_size,
         config.test_batch_size
     )
-
-    config.print_config()
 
     trainer = Trainer(config, dataloaders)
     trainer.train()

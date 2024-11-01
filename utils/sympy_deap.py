@@ -1,7 +1,7 @@
 import sympy as sp
 from utils.sympy_prefix import operators, numbers_types
 
-deap_to_sympy = {
+deap_operators = {
     'add': sp.Add,
     'sub': lambda x, y: sp.Add(x, -y),
     'mul': sp.Mul,
@@ -59,7 +59,7 @@ def deap_to_sympy(func_form):
     - SymPy expression.
     """
     def _parse_expr(expression):
-        for func, sympy_func in deap_to_sympy.items():
+        for func, sympy_func in deap_operators.items():
             if expression.startswith(f"{func}(") and expression.endswith(")"):
                 args_str = expression[len(func) + 1:-1]
                 args = _split_args(args_str)

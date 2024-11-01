@@ -23,7 +23,7 @@ def prepare_dataset(config):
     - train_df: DataFrame containing training data information
     - equations_df: DataFrame containing equations information
     """
-    input_max_len = config.input_max_len
+    #input_max_len = config.chunk_size
     df = pd.read_csv(config.df_path)
 
     # encoder_tokenizer = EncoderTokenizer(config.encoder_vocab, config.max_len)
@@ -142,6 +142,9 @@ def get_datasets(df, input_df, dataset_dir, split):
     - train_equations: List of equations used for training
     - test_equations: List of equations used for testing
     """
+    
+    assert sum(split) == 1.0, "split ratios should sum to 1"
+    
     train_df, test_df = train_test_split(df, test_size=split[2], shuffle=True, random_state=42)
     train_equations = train_df['Filename'].tolist()
     test_equations = test_df['Filename'].tolist()
@@ -149,14 +152,7 @@ def get_datasets(df, input_df, dataset_dir, split):
     input_test_df = input_df[input_df['filename'].isin(test_equations)]
     input_train_df = input_df[input_df['filename'].isin(train_equations)]
 
-#     input_train_df, input_test_df = train_test_split(input_df, test_size=split[2], shuffle=True, random_state=1)
     val_size = split[1]/(split[0] + split[1])
-#     train_df, val_df = train_test_split(train_df, test_size=val_size, shuffle=True, random_state=42)
-#     train_equations = train_df['Filename'].tolist()
-#     val_equations = val_df['Filename'].tolist()
-
-#     input_val_df = input_df[input_df['filename'].isin(val_equations)]
-#     input_train_df = input_df[input_df['filename'].isin(train_equations)]
 
     input_train_df, input_val_df = train_test_split(input_train_df, test_size=val_size, shuffle=True, random_state=42)
 

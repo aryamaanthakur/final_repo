@@ -58,7 +58,7 @@ class Trainer:
         Initialize and return the model based on the configuration.
         """
         if self.config.model_name == "seq2seq_transformer":
-            from model.seq2seq import Model
+            from algorithms.transformers.model.seq2seq import Model
             model = Model(num_encoder_layers=self.config.num_encoder_layers,
                           num_decoder_layers=self.config.num_decoder_layers,
                           emb_size=self.config.embedding_size,
@@ -103,6 +103,8 @@ class Trainer:
             scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='min', patience=2)
         elif self.config.scheduler_type == "cosine_annealing_warm_restart":
             scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(self.optimizer, self.config.T_0, self.config.T_mult)
+        elif self.config.scheduler_type == "cosine_annealing":
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, self.config.T_max)
         elif self.config.scheduler_type == "none":
             scheduler = None
         else:
