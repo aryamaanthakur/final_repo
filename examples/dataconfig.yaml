@@ -1,8 +1,7 @@
 max_len: 11
 output_dir: data
-encoder_vocab: ./algorithms/transformers/encoder_vocab
-decoder_vocab: ./algorithms/transformers/decoder_vocab
+encoder_vocab: ./algorithms/xval-transformers/encoder_vocab
+decoder_vocab: ./algorithms/xval-transformers/decoder_vocab
 xval: true
 chunk_size: 400
 df_path: ./FeynmanEquationsModified.csv
-output_dir: ./data

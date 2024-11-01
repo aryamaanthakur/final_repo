@@ -1,0 +1,8 @@
+deap==1.4.1
+numpy
+pandas
+PyYAML
+scikit-learn
+sympy
+torch==2.3.1
+tqdm==4.66.4

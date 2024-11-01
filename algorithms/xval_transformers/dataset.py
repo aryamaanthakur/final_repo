@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 import torch
 from torch.utils.data import Dataset, DataLoader
 from torch.nn.utils.rnn import pad_sequence
-from utils import EncoderTokenizer, DecoderTokenizer
+from utils import DecoderTokenizer
 
 PAD_IDX = 0
 NUM_IDX = 1

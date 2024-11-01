@@ -3,11 +3,11 @@ from typing import Optional, List
 
 @dataclass
 class Config:
-    experiment_name: Optional[str] = "seq2seq"
+    experiment_name: Optional[str] = "test"
     root_dir: Optional[str] = "./"
     device: Optional[str] = "cuda:0"
     
-    #data
+    #data parameters
     train_batch_size: Optional[int] = 256
     test_batch_size:Optional[int] = 256
     train_split: Optional[float] = 0.8
@@ -15,7 +15,7 @@ class Config:
     primary_df: Optional[str] = "./FeynmanEquationsModified.csv"
     train_df: Optional[str] = "./data_400/train_df.csv"
     data_dir: Optional[str] = "./data_400"
-
+    chunk_size: Optional[int] = 400
 
     #training parameters
     epochs: Optional[int] = 10
@@ -27,6 +27,7 @@ class Config:
     T_0: Optional[int] = 10
     T_mult: Optional[int] = 1
     T_max: Optional[int] = 18750
+
     # optimizer parameters
     optimizer_type: Optional[str] = "adam" # sgd or adam
     optimizer_lr: Optional[float] = 5e-5   
@@ -36,7 +37,7 @@ class Config:
         
     # Model Parameters
     model_name: Optional[str] = "seq2seq_transformer"
-    hybrid: Optional[bool] = True
+    xval: Optional[bool] = True
     embedding_size: Optional[int] = 64
     hidden_dim: Optional[int] = 64
     nhead: Optional[int] = 8
@@ -52,13 +53,11 @@ class Config:
     criterion: Optional[str] = "cross_entropy"
     
     # Hybrid
-    xval: Optional[bool] = True
     pop_size: Optional[int] = 500
     cxpb: Optional[float] = 0.7
     mutpb: Optional[float] = 0.2 
     num_generations: Optional[int] = 15
     gp_verbose: Optional[bool] = False
-    chunk_size: Optional[int] = 400
     beam_size: Optional[int] = 5
     num_equations: Optional[int] = 20
 

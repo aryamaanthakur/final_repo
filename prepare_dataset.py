@@ -5,13 +5,13 @@ import os
 
 @dataclass
 class Config:
-    max_len: int = 11
-    xval: bool = True
+    max_len: int = 33
+    xval: bool = False
     chunk_size: int = 400
     df_path: str = "./FeynmanEquationsModified.csv"
     output_dir: str = "./data"
-    encoder_vocab: str = "./encoder_vocab"
-    decoder_vocab: str = "./algorithms/xval_transformer/decoder_vocab"
+    encoder_vocab: str = "./algorithms/transformer/encoder_vocab"
+    decoder_vocab: str = "./algorithms/transformer/decoder_vocab"
 
 def parse_args() -> Config:
     parser = argparse.ArgumentParser(description="Argument parser for dataset preparation")
