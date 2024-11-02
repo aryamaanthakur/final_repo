@@ -3,7 +3,6 @@ from sklearn.metrics import r2_score
 from deap import gp
 import numpy as np
 from utils.tokenizers import DecoderTokenizer
-from utils.sympy_prefix import prefix_to_sympy
 from utils.sympy_deap import sympy_to_deap, deap_to_sympy
 from algorithms.hybrid.custom_gp import CustomGP, CustomGPConfig
 from algorithms.xval_transformers.dataset import NUM_IDX, PAD_IDX
